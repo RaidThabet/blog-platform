@@ -5,7 +5,6 @@ services:
     image: postgres
     ports:
       - "5432:5432"
-    restart: always
     environment:
       POSTGRES_DB: blog
       POSTGRES_USER: postgres
@@ -14,6 +13,5 @@ services:
   # DB management interface
   adminer:
     image: adminer
-    restart: always
     ports:
       - "8888:8080"

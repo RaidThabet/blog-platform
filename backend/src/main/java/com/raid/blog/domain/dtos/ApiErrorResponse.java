@@ -14,7 +14,7 @@ import java.util.List;
 public class ApiErrorResponse {
     private int status;
     private String message;
-    private List<FieldError> errors;
+    private List<FieldError> errors; // Used in case of form validation
 
     @Data
     @Builder
