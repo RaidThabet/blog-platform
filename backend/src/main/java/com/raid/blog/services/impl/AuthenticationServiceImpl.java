@@ -1,6 +1,7 @@
 package com.raid.blog.services.impl;
 
 import com.raid.blog.services.AuthenticationService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +47,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiryMs))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    @Override
+    public UserDetails validateToken(String token) {
+        String username = extractUsername(token);
+
+        return userDetailsService.loadUserByUsername(username);
+    }
+
+    private String extractUsername(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith((SecretKey) getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.getSubject();
     }
 
     private Key getSigningKey() {
