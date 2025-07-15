@@ -1,5 +1,7 @@
 package com.raid.blog.services.impl;
 
+import com.raid.blog.domain.entities.User;
+import com.raid.blog.repositories.UserRepository;
 import com.raid.blog.services.AuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -21,8 +24,10 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -35,6 +40,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 new UsernamePasswordAuthenticationToken(email, password)
         );
         return userDetailsService.loadUserByUsername(email);
+    }
+
+    @Override
+    public void register(String name, String email, String password) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException("User with this email already exists");
+        }
+
+        var encodedPassword = passwordEncoder.encode(password);
+
+        var user = User.builder()
+                .name(name)
+                .email(email)
+                .password(encodedPassword)
+                .build();
+
+        userRepository.save(user);
     }
 
     @Override

@@ -2,7 +2,9 @@ package com.raid.blog.controllers;
 
 import com.raid.blog.domain.dtos.AuthResponse;
 import com.raid.blog.domain.dtos.LoginRequest;
+import com.raid.blog.domain.dtos.RegisterRequest;
 import com.raid.blog.services.AuthenticationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +21,7 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<AuthResponse> login(
-            @RequestBody LoginRequest request
+            @RequestBody @Valid LoginRequest request
     ) {
         UserDetails userDetails = authenticationService.authenticate(request.getEmail(), request.getPassword());
         String tokenValue = authenticationService.generateToken(userDetails);
@@ -30,5 +32,18 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("register")
+    public ResponseEntity<?> register(
+            @RequestBody @Valid RegisterRequest request
+    ) {
+        authenticationService.register(
+                request.getName(),
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return ResponseEntity.accepted().build();
     }
 }
