@@ -1,7 +1,7 @@
 package com.raid.blog.controllers;
 
 import com.raid.blog.domain.dtos.CreateTagsRequest;
-import com.raid.blog.domain.dtos.TagResponse;
+import com.raid.blog.domain.dtos.TagDto;
 import com.raid.blog.mappers.TagMapper;
 import com.raid.blog.services.TagService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class TagController {
     private final TagMapper tagMapper;
 
     @GetMapping
-    public ResponseEntity<List<TagResponse>> getAllTags() {
-        List<TagResponse> tags = tagService.getTags().stream()
+    public ResponseEntity<List<TagDto>> getAllTags() {
+        List<TagDto> tags = tagService.getTags().stream()
                 .map(tagMapper::toTagResponse)
                 .toList();
 
@@ -30,7 +30,7 @@ public class TagController {
     }
 
     @PostMapping
-    public ResponseEntity<List<TagResponse>> createTags(
+    public ResponseEntity<List<TagDto>> createTags(
             @RequestBody CreateTagsRequest request
     ) {
         var savedTags = tagService.createTags(request.getNames());
