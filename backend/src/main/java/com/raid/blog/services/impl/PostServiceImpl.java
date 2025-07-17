@@ -4,6 +4,7 @@ import com.raid.blog.domain.PostStatus;
 import com.raid.blog.domain.entities.Category;
 import com.raid.blog.domain.entities.Post;
 import com.raid.blog.domain.entities.Tag;
+import com.raid.blog.domain.entities.User;
 import com.raid.blog.repositories.PostRepository;
 import com.raid.blog.services.CategoryService;
 import com.raid.blog.services.PostService;
@@ -49,5 +50,10 @@ public class PostServiceImpl implements PostService {
             );
         }
         return postRepository.findAllByStatus(PostStatus.PUBLISHED);
+    }
+
+    @Override
+    public List<Post> getDraftPosts(User user) {
+        return postRepository.findAllByAuthorAndStatus(user, PostStatus.DRAFT);
     }
 }
