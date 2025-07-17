@@ -128,4 +128,10 @@ public class PostServiceImpl implements PostService {
 
         return postRepository.save(existingPost);
     }
+
+    @Override
+    public void deletePost(UUID id) {
+        Post existingPost = getPost(id);
+        postRepository.delete(existingPost);
+    }
 }

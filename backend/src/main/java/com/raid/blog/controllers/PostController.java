@@ -85,4 +85,13 @@ public class PostController {
 
         return new ResponseEntity<>(updatedPostDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable UUID id
+    ) {
+        postService.deletePost(id);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
