@@ -1,8 +1,10 @@
 package com.raid.blog.controllers;
 
 import com.raid.blog.domain.CreatePostRequest;
+import com.raid.blog.domain.UpdatePostRequest;
 import com.raid.blog.domain.dtos.CreatePostRequestDto;
 import com.raid.blog.domain.dtos.PostDto;
+import com.raid.blog.domain.dtos.UpdatePostRequestDto;
 import com.raid.blog.domain.entities.Post;
 import com.raid.blog.domain.entities.User;
 import com.raid.blog.mappers.PostMapper;
@@ -59,5 +61,17 @@ public class PostController {
         PostDto createdPostDto = postMapper.toDto(createdPOst);
 
         return new ResponseEntity<>(createdPostDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<PostDto> updatePost(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdatePostRequestDto request
+    ) {
+        UpdatePostRequest updatePostRequest = postMapper.toUpdatePostRequest(request);
+        Post updatedPost = postService.updatePost(id, updatePostRequest);
+        PostDto updatedPostDto = postMapper.toDto(updatedPost);
+
+        return new ResponseEntity<>(updatedPostDto, HttpStatus.OK);
     }
 }
