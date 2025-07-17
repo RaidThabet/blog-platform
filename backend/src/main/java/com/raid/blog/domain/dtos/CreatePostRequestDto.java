@@ -35,6 +35,6 @@ public class CreatePostRequestDto {
     private Set<UUID> tagIds = new HashSet<>();
 
     @NotNull(message = "Post status is required")
-    private PostStatus postStatus;
+    private PostStatus status;
 
 }

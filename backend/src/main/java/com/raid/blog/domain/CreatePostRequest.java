@@ -24,5 +24,5 @@ public class CreatePostRequest {
     @Builder.Default
     private Set<UUID> tagIds = new HashSet<>();
 
-    private PostStatus postStatus;
+    private PostStatus status;
 }

@@ -70,7 +70,7 @@ public class PostServiceImpl implements PostService {
         Post newPost = Post.builder()
                 .title(createPostRequest.getTitle())
                 .content(createPostRequest.getContent())
-                .status(createPostRequest.getPostStatus())
+                .status(createPostRequest.getStatus())
                 .readingTime(readingTime)
                 .author(user)
                 .category(category)
