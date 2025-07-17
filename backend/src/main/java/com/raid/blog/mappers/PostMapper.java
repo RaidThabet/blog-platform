@@ -1,5 +1,7 @@
 package com.raid.blog.mappers;
 
+import com.raid.blog.domain.CreatePostRequest;
+import com.raid.blog.domain.dtos.CreatePostRequestDto;
 import com.raid.blog.domain.dtos.PostDto;
 import com.raid.blog.domain.entities.Post;
 import org.mapstruct.Mapper;
@@ -13,4 +15,6 @@ public interface PostMapper {
     @Mapping(target = "category", source = "category")
     @Mapping(target = "tags", source = "tags")
     PostDto toDto(Post post);
+
+    CreatePostRequest toCreatePostRequest(CreatePostRequestDto createPostRequestDto);
 }
