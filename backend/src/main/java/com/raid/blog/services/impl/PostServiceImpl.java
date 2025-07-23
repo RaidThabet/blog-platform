@@ -109,9 +109,13 @@ public class PostServiceImpl implements PostService {
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post does not exist"));
 
+        int newReadingTime = calculateReadingTime(updatePostRequest.getContent());
+
         existingPost.setTitle(updatePostRequest.getTitle());
         existingPost.setContent(updatePostRequest.getContent());
         existingPost.setStatus(updatePostRequest.getStatus());
+        existingPost.setReadingTime(newReadingTime);
+
 
         UUID updatePostRequestCategoryId = updatePostRequest.getCategoryId();
         if (!existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {

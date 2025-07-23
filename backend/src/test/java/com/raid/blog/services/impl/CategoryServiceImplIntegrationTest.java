@@ -54,7 +54,7 @@ class CategoryServiceImplIntegrationTest {
     }
 
     @Test
-    void should_not_delete_category_with_posts_and_delete_after_posts_removed() {
+    void should_not_delete_category_with_posts_and_should_delete_after_posts_removed() {
         Post post = new Post();
         Category category = new Category();
         category.setName("Gaming");
