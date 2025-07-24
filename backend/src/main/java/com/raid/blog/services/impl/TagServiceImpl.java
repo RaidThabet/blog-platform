@@ -1,5 +1,6 @@
 package com.raid.blog.services.impl;
 
+import com.raid.blog.domain.entities.Post;
 import com.raid.blog.domain.entities.Tag;
 import com.raid.blog.repositories.TagRepository;
 import com.raid.blog.services.TagService;
@@ -49,7 +50,8 @@ public class TagServiceImpl implements TagService {
     @Override
     public void deleteTag(UUID id) {
         tagRepository.findById(id).ifPresent(tag -> {
-            if (!tag.getPosts().isEmpty()) {
+            Set<Post> posts = tag.getPosts();
+            if (!posts.isEmpty()) {
                 throw new IllegalStateException("Cannot delete tag with posts");
             }
             tagRepository.deleteById(id);
