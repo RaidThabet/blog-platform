@@ -118,6 +118,7 @@ class CategoryControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser
     @Test
     public void should_not_create_category_with_invalid_request() throws Exception {
         // Arrange
@@ -134,6 +135,7 @@ class CategoryControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser
     @Test
     public void should_delete_category() throws Exception {
         // Arrange
