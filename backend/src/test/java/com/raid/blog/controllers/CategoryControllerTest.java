@@ -5,7 +5,6 @@ import com.raid.blog.domain.dtos.CategoryDto;
 import com.raid.blog.domain.dtos.CreateCategoryRequest;
 import com.raid.blog.domain.entities.Category;
 import com.raid.blog.mappers.CategoryMapper;
-import com.raid.blog.security.JwtAuthenticationFilter;
 import com.raid.blog.services.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -68,7 +66,6 @@ class CategoryControllerTest {
 
         // Act and expect
         mockMvc.perform(get("/api/v1/categories"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(category1Id.toString()))
                 .andExpect(jsonPath("$[1].id").value(category2Id.toString()))
@@ -103,6 +100,42 @@ class CategoryControllerTest {
         CategoryDto response = objectMapper.readValue(responseBody, CategoryDto.class);
         assertEquals("Category", response.getName());
         assertEquals(0, response.getPostCount());
+    }
+
+    @WithMockUser
+    @Test
+    void should_not_create_existing_category_with_valid_request() throws Exception {
+        // Arrange
+        CreateCategoryRequest createCategoryRequest = CreateCategoryRequest.builder().name("Category").build();
+        Category categoryToCreate = Category.builder().name("Category").build();
+        String createCategoryRequestJSON = "{\"name\": \"Category\"}";
+
+        // What to return
+        given(categoryMapper.toEntity(createCategoryRequest)).willReturn(categoryToCreate);
+        given(categoryService.createCategory(categoryToCreate)).willThrow(IllegalArgumentException.class);
+
+        // Act and expect
+        mockMvc.perform(post("/api/v1/categories")
+                        .contentType("application/json")
+                        .content(createCategoryRequestJSON)
+                )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void should_not_create_category_with_invalid_request() throws Exception {
+        // Arrange
+        String createCategoryRequestJSON = "{\"name\": \" \"}";
+
+        // What to return
+
+        // Act and expect
+        mockMvc.perform(
+                        post("/api/v1/categories")
+                                .contentType("application/json")
+                                .content(createCategoryRequestJSON)
+                )
+                .andExpect(status().isBadRequest());
     }
 
     @Test
