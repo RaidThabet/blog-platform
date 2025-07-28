@@ -6,6 +6,7 @@ import com.raid.blog.domain.dtos.CategoryDto;
 import com.raid.blog.domain.dtos.CreateCategoryRequest;
 import com.raid.blog.domain.entities.Category;
 import com.raid.blog.mappers.CategoryMapper;
+import com.raid.blog.services.AuthenticationService;
 import com.raid.blog.services.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,9 @@ class CategoryControllerTest {
     @MockitoBean
     private CategoryMapper categoryMapper;
 
-    @WithMockUser(username = "user")
+    @MockitoBean
+    private AuthenticationService authenticationService;
+
     @Test
     void should_return_list_of_categories() throws Exception {
         // Arrange
