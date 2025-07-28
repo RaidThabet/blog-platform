@@ -1,6 +1,7 @@
 package com.raid.blog.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.raid.blog.config.TestSecurityConfig;
 import com.raid.blog.domain.dtos.CategoryDto;
 import com.raid.blog.domain.dtos.CreateCategoryRequest;
 import com.raid.blog.domain.entities.Category;
@@ -9,13 +10,8 @@ import com.raid.blog.services.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -32,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CategoryController.class)
-@Import(CategoryControllerTest.TestSecurityConfig.class)
+@Import(TestSecurityConfig.class)
 class CategoryControllerTest {
 
     @Autowired
@@ -146,19 +142,5 @@ class CategoryControllerTest {
         // Act and expect
         mockMvc.perform(delete("/api/v1/categories/" + categoryId))
                 .andExpect(status().isNoContent());
-    }
-
-    @TestConfiguration
-    static class TestSecurityConfig {
-
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                    .authorizeHttpRequests(auth -> auth
-                            .anyRequest().permitAll()
-                    )
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .build();
-        }
     }
 }

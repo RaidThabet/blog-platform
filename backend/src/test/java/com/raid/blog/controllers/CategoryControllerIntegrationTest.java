@@ -1,4 +1,4 @@
-package com.raid.blog.services.impl;
+package com.raid.blog.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.raid.blog.domain.PostStatus;
