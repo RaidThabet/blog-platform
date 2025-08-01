@@ -89,8 +89,6 @@ public class CategoryControllerIntegrationTest {
     @Test
     public void should_list_all_categories() throws Exception {
         // Arrange
-//        entityManager.flush();
-//        entityManager.clear();
 
         // Act and assert
         MvcResult mvcResult = mockMvc.perform(get("/api/v1/categories"))
