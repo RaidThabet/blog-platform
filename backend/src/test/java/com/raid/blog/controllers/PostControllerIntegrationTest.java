@@ -18,6 +18,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -95,7 +96,7 @@ public class PostControllerIntegrationTest {
 
     @Test
     @Order(value = 1)
-    public void should_create_three_posts() {
+    public void should_create_three_posts() throws JsonProcessingException {
         CreatePostRequestDto createPostRequestDto1 = CreatePostRequestDto.builder()
                 .title("Title 1")
                 .content("This is some testing content text")
@@ -120,44 +121,95 @@ public class PostControllerIntegrationTest {
                 .categoryId(this.category2.getId())
                 .build();
 
-        PostDto createdPost1 = createPost(createPostRequestDto1);
-        PostDto createdPost2 = createPost(createPostRequestDto2);
-        PostDto createdPost3 = createPost(createPostRequestDto3);
+        ResponseEntity<String> response1 = createPost(createPostRequestDto1);
+        if (response1.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.CREATED, response1.getStatusCode());
+            PostDto createdPost1 = objectMapper.readValue(response1.getBody(), PostDto.class);
+            assertNotNull(createdPost1);
+            assertEquals("Title 1", createdPost1.getTitle());
+            assertEquals("This is some testing content text", createdPost1.getContent());
+            assertEquals(this.category1.getId(), createdPost1.getCategory().getId());
+            assertEquals(
+                    Set.of(this.tags.stream().map(Tag::getId).toList().getFirst()),
+                    Set.of(createdPost1.getTags().stream().map(TagDto::getId).toList().getFirst())
+            );
+            this.postId = createdPost1.getId();
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response1.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
 
-        assertNotNull(createdPost1);
-        assertEquals("Title 1", createdPost1.getTitle());
-        assertEquals("This is some testing content text", createdPost1.getContent());
-        assertEquals(this.category1.getId(), createdPost1.getCategory().getId());
-        assertEquals(
-                Set.of(this.tags.stream().map(Tag::getId).toList().getFirst()),
-                Set.of(createdPost1.getTags().stream().map(TagDto::getId).toList().getFirst())
-        );
 
-        assertNotNull(createdPost2);
-        assertEquals("Title 2", createdPost2.getTitle());
-        assertEquals("This is some testing content text", createdPost2.getContent());
-        assertEquals(this.category2.getId(), createdPost2.getCategory().getId());
-        assertEquals(
-                Set.of(this.tags.stream().map(Tag::getId).toList().getLast()),
-                Set.of(createdPost2.getTags().stream().map(TagDto::getId).toList().getLast())
-        );
+        ResponseEntity<String> response2 = createPost(createPostRequestDto2);
+        if (response2.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.CREATED, response2.getStatusCode());
+            PostDto createdPost2 = objectMapper.readValue(response2.getBody(), PostDto.class);
+            assertNotNull(createdPost2);
+            assertEquals("Title 2", createdPost2.getTitle());
+            assertEquals("This is some testing content text", createdPost2.getContent());
+            assertEquals(this.category2.getId(), createdPost2.getCategory().getId());
+            assertEquals(
+                    Set.of(this.tags.stream().map(Tag::getId).toList().getLast()),
+                    Set.of(createdPost2.getTags().stream().map(TagDto::getId).toList().getLast())
+            );
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response1.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
 
-        assertNotNull(createdPost3);
-        assertEquals("Title 3", createdPost3.getTitle());
-        assertEquals("This is some testing content text", createdPost2.getContent());
-        assertEquals(this.category2.getId(), createdPost2.getCategory().getId());
-        assertEquals(0, createdPost3.getTags().size());
-
-        this.postId = createdPost1.getId();
+        ResponseEntity<String> response3 = createPost(createPostRequestDto3);
+        if (response1.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.CREATED, response3.getStatusCode());
+            PostDto createdPost3 = objectMapper.readValue(response3.getBody(), PostDto.class);
+            assertNotNull(createdPost3);
+            assertEquals("Title 3", createdPost3.getTitle());
+            assertEquals("This is some testing content text", createdPost3.getContent());
+            assertEquals(this.category2.getId(), createdPost3.getCategory().getId());
+            assertEquals(0, createdPost3.getTags().size());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response1.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
     }
 
     @Test
-    public void should_list_all_created_posts() {
-        Object response = getListOfPosts("");
+    public void should_not_create_post_with_invalid_request() throws JsonProcessingException {
+        CreatePostRequestDto createPostRequestDto = CreatePostRequestDto.builder()
+                .title("")
+                .content("")
+                .categoryId(this.category1.getId())
+                .tagIds(Set.of())
+                .status(PostStatus.DRAFT)
+                .build();
+        ResponseEntity<String> response = createPost(createPostRequestDto);
 
-        if (response instanceof List<?>) {
-            @SuppressWarnings("unchecked")
-            List<PostDto> posts = (List<PostDto>) response;
+        System.out.println(response.getBody());
+
+        if (response.getStatusCode().is4xxClientError()) {
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            assertEquals(400, errorResponse.getStatus());
+            assertEquals("Validation failed", errorResponse.getMessage());
+            assertNotNull(errorResponse.getErrors());
+            assertEquals(4, errorResponse.getErrors().size());
+            assertEquals(Set.of("title", "content"), errorResponse.getErrors().stream().map(ApiErrorResponse.FieldError::getField).collect(Collectors.toSet()));
+        } else if (response.getStatusCode().is2xxSuccessful()) {
+            PostDto createdPost = objectMapper.readValue(response.getBody(), PostDto.class);
+            fail("Post with bad creation request was successfully created: " + createdPost.toString());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
+    public void should_list_all_created_posts() throws JsonProcessingException {
+        ResponseEntity<String> response = getListOfPosts("");
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<PostDto> posts = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+            });
             assertNotNull(posts);
             assertEquals(2, posts.size());
             assertEquals("Title 1", posts.getFirst().getTitle());
@@ -165,90 +217,103 @@ public class PostControllerIntegrationTest {
             assertEquals("Title 2", posts.getLast().getTitle());
             assertEquals(PostStatus.PUBLISHED, posts.getLast().getStatus());
         } else {
-            ApiErrorResponse errorResponse = (ApiErrorResponse) response;
-            fail(errorResponse.getStatus() + " ERROR: " + errorResponse.getMessage());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
         }
     }
 
     @Test
-    public void should_list_posts_with_specific_category() {
-        Object response = getListOfPosts("?categoryId=" + this.category1.getId());
+    public void should_list_posts_with_specific_category() throws JsonProcessingException {
+        ResponseEntity<String> response = getListOfPosts("?categoryId=" + this.category1.getId());
 
-        if (response instanceof List<?>) {
-            @SuppressWarnings("unchecked")
-            List<PostDto> posts = (List<PostDto>) response;
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<PostDto> posts = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+            });
             assertNotNull(posts);
             assertEquals(1, posts.size());
             assertEquals("Title 1", posts.getFirst().getTitle());
             assertEquals(PostStatus.PUBLISHED, posts.getFirst().getStatus());
             assertEquals(this.category1.getId(), posts.getFirst().getCategory().getId());
         } else {
-            ApiErrorResponse errorResponse = (ApiErrorResponse) response;
-            fail(errorResponse.getStatus() + " ERROR: " + errorResponse.getMessage());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
         }
     }
 
     @Test
-    public void should_list_posts_with_specific_tag() {
-        Object response = getListOfPosts("?tagId=" + this.tags.getFirst().getId());
+    public void should_list_posts_with_specific_tag() throws JsonProcessingException {
+        ResponseEntity<String> response = getListOfPosts("?tagId=" + this.tags.getFirst().getId());
 
-        if (response instanceof List<?>) {
-            @SuppressWarnings("unchecked")
-            List<PostDto> posts = (List<PostDto>) response;
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<PostDto> posts = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+            });
             assertNotNull(posts);
             assertEquals(1, posts.size());
             assertEquals("Title 1", posts.getFirst().getTitle());
             assertEquals(PostStatus.PUBLISHED, posts.getFirst().getStatus());
             assertEquals(this.tags.getFirst().getId(), posts.getFirst().getTags().stream().toList().getFirst().getId());
         } else {
-            ApiErrorResponse errorResponse = (ApiErrorResponse) response;
-            fail(errorResponse.getStatus() + " ERROR: " + errorResponse.getMessage());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
         }
 
     }
 
     @Test
-    public void should_list_posts_with_specific_tag_and_category() {
-        Object response = getListOfPosts("?tagId=" + this.tags.getLast().getId() + "&categoryId=" + this.category2.getId());
+    public void should_list_posts_with_specific_tag_and_category() throws JsonProcessingException {
+        ResponseEntity<String> response = getListOfPosts("?tagId=" + this.tags.getLast().getId() + "&categoryId=" + this.category2.getId());
 
-        if (response instanceof List<?>) {
-            @SuppressWarnings("unchecked")
-            List<PostDto> posts = (List<PostDto>) response;
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<PostDto> posts = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+            });
             assertNotNull(posts);
             assertEquals(1, posts.size());
             assertEquals("Title 2", posts.getFirst().getTitle());
             assertEquals(PostStatus.PUBLISHED, posts.getFirst().getStatus());
             assertEquals(this.tags.getLast().getId(), posts.getFirst().getTags().stream().toList().getFirst().getId());
         } else {
-            ApiErrorResponse errorResponse = (ApiErrorResponse) response;
-            fail(errorResponse.getStatus() + " ERROR: " + errorResponse.getMessage());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
         }
     }
 
     @Test
-    public void should_get_existing_post_by_id() {
-        PostDto retrievedPost = getPostByItsId();
+    public void should_return_error_when_listing_posts_with_nonexistent_category() throws JsonProcessingException {
+        ResponseEntity<String> response = getListOfPosts("?categoryId=" + UUID.randomUUID());
 
-        assertNotNull(retrievedPost);
-        assertEquals(retrievedPost.getId(), this.postId);
-    }
-
-    @Test
-    public void should_return_error_when_listing_posts_with_nonexistent_category() {
-        Object response = getListOfPosts("?categoryId=" + UUID.randomUUID());
-
-        if (response instanceof ApiErrorResponse errorResponse) {
+        if (response.getStatusCode().is4xxClientError()) {
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
             System.out.println(errorResponse);
             assertNotNull(errorResponse);
             assertEquals(404, errorResponse.getStatus());
             assertEquals("Category not found", errorResponse.getMessage());
             assertNull(errorResponse.getErrors());
         } else {
-            fail("Something went wrong");
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
         }
     }
 
-    private PostDto createPost(CreatePostRequestDto createPostRequestDto) {
+    @Test
+    public void should_get_existing_post_by_id() throws JsonProcessingException {
+        ResponseEntity<String> response = getPostByItsId();
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            PostDto retrievedPost = objectMapper.readValue(response.getBody(), PostDto.class);
+            assertNotNull(retrievedPost);
+            assertEquals(retrievedPost.getId(), this.postId);
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    private ResponseEntity<String> createPost(CreatePostRequestDto createPostRequestDto) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.jwtToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -256,26 +321,18 @@ public class PostControllerIntegrationTest {
         HttpEntity<CreatePostRequestDto> requestDtoHttpEntity = new HttpEntity<>(createPostRequestDto, headers);
 
         try {
-            ResponseEntity<PostDto> response = restTemplate.exchange(
+            ResponseEntity<String> response = restTemplate.exchange(
                     "/api/v1/posts",
                     HttpMethod.POST,
                     requestDtoHttpEntity,
-                    PostDto.class
+                    String.class
             );
 
             System.out.println("Raw JSON response: " + response.getBody());
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                assertEquals(HttpStatus.CREATED, response.getStatusCode());
-                return response.getBody();
-            } else {
-                fail("Request failed with status: " + response.getStatusCode() +
-                        ", body: " + response.getBody());
-                return null;
-            }
-
+            return response;
         } catch (RestClientException e) {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
@@ -283,7 +340,7 @@ public class PostControllerIntegrationTest {
         }
     }
 
-    public Object getListOfPosts(String requestQueryParams) {
+    public ResponseEntity<String> getListOfPosts(String requestQueryParams) {
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity<PostDto> requestEntity = new HttpEntity<>(httpHeaders);
 
@@ -299,29 +356,15 @@ public class PostControllerIntegrationTest {
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                List<PostDto> posts = objectMapper.readValue(response.getBody(), new TypeReference<>() {
-                });
-                assertEquals(HttpStatus.OK, response.getStatusCode());
-//                assertInstanceOf(List.class, posts);
-
-                return posts;
-            } else { // just return ApiErrorResponse object
-//                fail("Request failed with status: " + response.getStatusCode() +
-//                        ", body: " + response.getBody());
-                ApiErrorResponse error = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
-                return error;
-            }
+            return response;
         } catch (RestClientException e) {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public PostDto getPostByItsId() {
+    public ResponseEntity<String> getPostByItsId() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(this.jwtToken);
         HttpEntity<PostDto> requestEntity = new HttpEntity<>(httpHeaders);
@@ -338,23 +381,12 @@ public class PostControllerIntegrationTest {
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                assertEquals(HttpStatus.OK, response.getStatusCode());
-                PostDto postDto = objectMapper.readValue(response.getBody(), new TypeReference<>() {
-                });
-                return postDto;
-            } else {
-                fail("Request failed with status: " + response.getStatusCode() +
-                        ", body: " + response.getBody());
-                return null;
-            }
+            return response;
 
         } catch (RestClientException e) {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
     }
 }
