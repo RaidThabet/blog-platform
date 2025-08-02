@@ -173,6 +173,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 2)
     public void should_not_create_post_with_invalid_request() throws JsonProcessingException {
         CreatePostRequestDto createPostRequestDto = CreatePostRequestDto.builder()
                 .title("")
@@ -203,6 +204,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 3)
     public void should_list_all_created_posts() throws JsonProcessingException {
         ResponseEntity<String> response = getListOfPosts("");
 
@@ -223,6 +225,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 4)
     public void should_list_posts_with_specific_category() throws JsonProcessingException {
         ResponseEntity<String> response = getListOfPosts("?categoryId=" + this.category1.getId());
 
@@ -242,6 +245,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 5)
     public void should_list_posts_with_specific_tag() throws JsonProcessingException {
         ResponseEntity<String> response = getListOfPosts("?tagId=" + this.tags.getFirst().getId());
 
@@ -262,6 +266,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 6)
     public void should_list_posts_with_specific_tag_and_category() throws JsonProcessingException {
         ResponseEntity<String> response = getListOfPosts("?tagId=" + this.tags.getLast().getId() + "&categoryId=" + this.category2.getId());
 
@@ -281,6 +286,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 7)
     public void should_return_error_when_listing_posts_with_nonexistent_category() throws JsonProcessingException {
         ResponseEntity<String> response = getListOfPosts("?categoryId=" + UUID.randomUUID());
 
@@ -299,6 +305,7 @@ public class PostControllerIntegrationTest {
     }
 
     @Test
+    @Order(value = 8)
     public void should_get_existing_post_by_id() throws JsonProcessingException {
         ResponseEntity<String> response = getPostByItsId();
 
@@ -307,6 +314,106 @@ public class PostControllerIntegrationTest {
             PostDto retrievedPost = objectMapper.readValue(response.getBody(), PostDto.class);
             assertNotNull(retrievedPost);
             assertEquals(retrievedPost.getId(), this.postId);
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
+    @Order(value = 9)
+    public void should_update_existing_post_with_valid_request() throws JsonProcessingException {
+        UpdatePostRequestDto updatePostRequestDto = UpdatePostRequestDto.builder()
+                .id(this.postId) // id of post 1
+                .title("New Title 1")
+                .content("New content for post 1")
+                .categoryId(this.category2.getId())
+                .tagIds(Set.of())
+                .status(PostStatus.DRAFT)
+                .build();
+        ResponseEntity<String> response = updatePost(updatePostRequestDto, this.postId);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            PostDto updatedPost = objectMapper.readValue(response.getBody(), PostDto.class);
+            assertNotNull(updatedPost);
+            assertEquals(updatedPost.getId(), this.postId);
+            assertEquals("New Title 1", updatedPost.getTitle());
+            assertEquals("New content for post 1", updatedPost.getContent());
+            assertEquals(PostStatus.DRAFT, updatedPost.getStatus());
+            assertEquals(0, updatedPost.getTags().size());
+            assertEquals(this.category2.getId(), updatedPost.getCategory().getId());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
+    @Order(value = 10)
+    public void should_not_update_nonexisting_post() throws JsonProcessingException {
+        UUID randomPostId = UUID.randomUUID();
+        UpdatePostRequestDto updatePostRequestDto = UpdatePostRequestDto.builder()
+                .id(randomPostId)
+                .title("New Title 1")
+                .content("New content for post 1")
+                .categoryId(this.category2.getId())
+                .tagIds(Set.of())
+                .status(PostStatus.DRAFT)
+                .build();
+        ResponseEntity<String> response = updatePost(updatePostRequestDto, randomPostId);
+
+        if (response.getStatusCode().is4xxClientError()) {
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(404, errorResponse.getStatus());
+            assertEquals("Post does not exist", errorResponse.getMessage());
+            assertNull(errorResponse.getErrors());
+        } else if (response.getStatusCode().is2xxSuccessful()) {
+            PostDto updatedPost = objectMapper.readValue(response.getBody(), PostDto.class);
+            fail("Non existent post got updated: " + updatedPost.toString());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
+    @Order(value = 11)
+    public void should_not_update_existing_post_with_invalid_request() throws JsonProcessingException {
+        UpdatePostRequestDto updatePostRequestDto = UpdatePostRequestDto.builder()
+                .build();
+        ResponseEntity<String> response = updatePost(updatePostRequestDto, this.postId);
+
+        if (response.getStatusCode().is4xxClientError()) {
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(400, errorResponse.getStatus());
+            assertEquals("Validation failed", errorResponse.getMessage());
+            assertNotNull(errorResponse.getErrors());
+            assertEquals(5, errorResponse.getErrors().size());
+            assertEquals(
+                    Set.of("id", "title", "content", "categoryId", "status"),
+                    errorResponse.getErrors().stream().map(ApiErrorResponse.FieldError::getField).collect(Collectors.toSet())
+            );
+        } else if (response.getStatusCode().is2xxSuccessful()) {
+            PostDto updatedPost = objectMapper.readValue(response.getBody(), PostDto.class);
+            fail("Non existent post got updated: " + updatedPost.toString());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
+    @Order(value = 12)
+    public void should_delete_existing_post() throws JsonProcessingException {
+        ResponseEntity<String> response = deletePost(this.postId);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         } else {
             ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
             fail(errorResponse.toString());
@@ -340,7 +447,7 @@ public class PostControllerIntegrationTest {
         }
     }
 
-    public ResponseEntity<String> getListOfPosts(String requestQueryParams) {
+    private ResponseEntity<String> getListOfPosts(String requestQueryParams) {
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity<PostDto> requestEntity = new HttpEntity<>(httpHeaders);
 
@@ -364,7 +471,7 @@ public class PostControllerIntegrationTest {
         }
     }
 
-    public ResponseEntity<String> getPostByItsId() {
+    private ResponseEntity<String> getPostByItsId() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(this.jwtToken);
         HttpEntity<PostDto> requestEntity = new HttpEntity<>(httpHeaders);
@@ -373,6 +480,60 @@ public class PostControllerIntegrationTest {
             ResponseEntity<String> response = restTemplate.exchange(
                     "/api/v1/posts/" + this.postId,
                     HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
+
+            System.out.println("Raw JSON response: " + response.getBody());
+            System.out.println("Response status: " + response.getStatusCode());
+            System.out.println("Response headers: " + response.getHeaders());
+
+            return response;
+
+        } catch (RestClientException e) {
+            System.err.println("RestClientException: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private ResponseEntity<String> updatePost(UpdatePostRequestDto requestDto, UUID postId) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(this.jwtToken);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<UpdatePostRequestDto> requestEntity = new HttpEntity<>(requestDto, httpHeaders);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "/api/v1/posts/" + postId,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class
+            );
+
+            System.out.println("Raw JSON response: " + response.getBody());
+            System.out.println("Response status: " + response.getStatusCode());
+            System.out.println("Response headers: " + response.getHeaders());
+
+            return response;
+
+        } catch (RestClientException e) {
+            System.err.println("RestClientException: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private ResponseEntity<String> deletePost(UUID postId) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(this.jwtToken);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<UpdatePostRequestDto> requestEntity = new HttpEntity<>(httpHeaders);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "/api/v1/posts/" + postId,
+                    HttpMethod.DELETE,
                     requestEntity,
                     String.class
             );
