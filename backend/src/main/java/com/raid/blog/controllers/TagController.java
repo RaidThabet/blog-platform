@@ -4,6 +4,7 @@ import com.raid.blog.domain.dtos.CreateTagsRequest;
 import com.raid.blog.domain.dtos.TagDto;
 import com.raid.blog.mappers.TagMapper;
 import com.raid.blog.services.TagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class TagController {
 
     @PostMapping
     public ResponseEntity<List<TagDto>> createTags(
-            @RequestBody CreateTagsRequest request
+            @RequestBody @Valid CreateTagsRequest request
     ) {
         var savedTags = tagService.createTags(request.getNames());
         var createdTagResponse = savedTags.stream().map(tagMapper::toTagResponse).toList();

@@ -17,4 +17,6 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
     int countByName(String name);
 
     long count();
+
+    int countById(UUID id);
 }
