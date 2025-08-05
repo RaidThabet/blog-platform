@@ -21,6 +21,34 @@ import java.lang.annotation.Target;
                 content = {@Content(
                         array = @ArraySchema(
                                 schema = @Schema(implementation = PostDto.class)
+                        ),
+                        examples = @ExampleObject(
+                                value = """
+                                [ {
+                                  "id" : "cee0ef62-1ba1-46a8-8093-b0d3aa4b48ff",
+                                  "title" : "Title 1",
+                                  "content" : "This is some testing content text",
+                                  "author" : {
+                                    "id" : "b89db9a8-27ac-4556-a220-cc9bb612462b",
+                                    "name" : "Raid"
+                                  },
+                                  "category" : {
+                                    "id" : "db28c9c6-0263-4143-8d70-d263e0f13352",
+                                    "name" : "Category 1",
+                                    "postCount" : 0
+                                  },
+                                  "tags" : [ {
+                                    "id" : "4d72f6ba-c473-4858-9387-13ec157390a8",
+                                    "name" : "Tag 1",
+                                    "postCount" : null
+                                  } ],
+                                  "readingTime" : 1,
+                                  "createdAt" : "2025-08-05T19:49:06.153099",
+                                  "updatedAt" : "2025-08-05T19:49:06.153122",
+                                  "status" : "DRAFT"
+                                  },
+                                ]
+                                """
                         ))}),
         @ApiResponse(responseCode = "400", description = "Invalid authenticated user",
                 content = @Content(
