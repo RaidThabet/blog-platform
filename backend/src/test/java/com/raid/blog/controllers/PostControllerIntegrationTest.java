@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.raid.blog.domain.PostStatus;
 import com.raid.blog.domain.dtos.*;
 import com.raid.blog.domain.entities.Category;
@@ -435,7 +436,10 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -444,6 +448,8 @@ public class PostControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -459,7 +465,10 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -468,6 +477,8 @@ public class PostControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -484,7 +495,10 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -494,6 +508,8 @@ public class PostControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -511,7 +527,10 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -521,6 +540,8 @@ public class PostControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -538,7 +559,6 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 

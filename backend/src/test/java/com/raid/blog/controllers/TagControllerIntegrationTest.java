@@ -3,6 +3,7 @@ package com.raid.blog.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.raid.blog.domain.dtos.*;
 import com.raid.blog.repositories.TagRepository;
 import org.junit.jupiter.api.*;
@@ -247,7 +248,10 @@ public class TagControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -256,6 +260,8 @@ public class TagControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -273,7 +279,10 @@ public class TagControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+
+            System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
@@ -282,6 +291,8 @@ public class TagControllerIntegrationTest {
             System.err.println("RestClientException: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -299,7 +310,6 @@ public class TagControllerIntegrationTest {
                     String.class
             );
 
-            System.out.println("Raw JSON response: " + response.getBody());
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
 
