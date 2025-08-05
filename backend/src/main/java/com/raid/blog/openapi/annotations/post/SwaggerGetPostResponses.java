@@ -34,7 +34,6 @@ import java.lang.annotation.Target;
                                 value = "{\"status\":404,\"message\":\"Post does not exist\",\"errors\":null}"
                         )
                 )),
-        @ApiResponse(responseCode = "403", description = "User is not authenticated or forbidden")
 })
 public @interface SwaggerGetPostResponses {
 }
