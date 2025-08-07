@@ -436,9 +436,13 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
+            String requestJSON = objectMapper.writeValueAsString(createPostRequestDto);
+
             ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
             String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+            String prettyJsonRequest = writer.writeValueAsString(objectMapper.readTree(requestJSON));
 
+            System.out.println("Raw JSON request: \n" + prettyJsonRequest);
             System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
@@ -527,9 +531,13 @@ public class PostControllerIntegrationTest {
                     String.class
             );
 
+            String requestJSON = objectMapper.writeValueAsString(requestDto);
+
             ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
             String prettyJson = writer.writeValueAsString(objectMapper.readTree(response.getBody()));
+            String prettyJsonRequest = writer.writeValueAsString(objectMapper.readTree(requestJSON));
 
+            System.out.println("Raw JSON request: \n" + prettyJsonRequest);
             System.out.println("Raw JSON response: \n" + prettyJson);
             System.out.println("Response status: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
