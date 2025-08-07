@@ -19,6 +19,7 @@ import java.lang.annotation.Target;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Found draft posts that belong to the authenticated user",
                 content = {@Content(
+                        mediaType = "application/json",
                         array = @ArraySchema(
                                 schema = @Schema(implementation = PostDto.class)
                         ),
@@ -55,7 +56,7 @@ import java.lang.annotation.Target;
                         mediaType = "application/json",
                         schema = @Schema(implementation = ApiErrorResponse.class),
                         examples = @ExampleObject(
-                                value = "{\"status\":400,\"message\":\"Invalid value provided for parameter 'userId'. Expected type: 'UUID'.\",\"errors\":null}"
+                                value = "{\"status\":400,\"message\":\"Invalid value provided for parameter 'id'. Expected type: 'UUID'.\",\"errors\":null}"
                         )
                 )),
         @ApiResponse(responseCode = "404", description = "User not found",

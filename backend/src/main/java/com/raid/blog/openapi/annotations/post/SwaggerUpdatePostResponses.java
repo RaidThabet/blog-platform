@@ -45,7 +45,34 @@ import java.lang.annotation.Target;
                         )
                 ),}),
         @ApiResponse(responseCode = "400", description = "Invalid update request",
-                content = @Content),
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ApiErrorResponse.class),
+                        examples = @ExampleObject(
+                                value = """
+                                        {
+                                          "status" : 400,
+                                          "message" : "Validation failed",
+                                          "errors" : [ {
+                                            "field" : "categoryId",
+                                            "message" : "Category ID is required"
+                                          }, {
+                                            "field" : "status",
+                                            "message" : "Post status is required"
+                                          }, {
+                                            "field" : "content",
+                                            "message" : "Content is required"
+                                          }, {
+                                            "field" : "id",
+                                            "message" : "Post ID is required"
+                                          }, {
+                                            "field" : "title",
+                                            "message" : "Title is required"
+                                          } ]
+                                        }
+                                        """
+                        )
+                )),
         @ApiResponse(responseCode = "404", description = "Post with specified id not found",
                 content = @Content(
                         mediaType = "application/json",

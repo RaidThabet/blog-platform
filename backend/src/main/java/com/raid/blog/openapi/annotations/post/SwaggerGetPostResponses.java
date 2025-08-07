@@ -17,7 +17,37 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Found post with specified id",
-                content = {@Content(schema = @Schema(implementation = PostDto.class))}),
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = PostDto.class),
+                        examples = @ExampleObject(
+                                value = """
+                                        {
+                                          "id" : "7f8188c8-b123-4cb8-a7ff-262187307129",
+                                          "title" : "Title 1",
+                                          "content" : "This is some testing content text",
+                                          "author" : {
+                                            "id" : "e2312b47-5902-4b70-8497-d637bd291ee6",
+                                            "name" : "Raid"
+                                          },
+                                          "category" : {
+                                            "id" : "aab2e516-c9e1-445c-8f5c-4a08dd893382",
+                                            "name" : "Category 1",
+                                            "postCount" : 0
+                                          },
+                                          "tags" : [ {
+                                            "id" : "693269e8-7ccf-400d-aa61-c639d3658967",
+                                            "name" : "Tag 1",
+                                            "postCount" : null
+                                          } ],
+                                          "readingTime" : 1,
+                                          "createdAt" : "2025-08-07T15:07:37.833726",
+                                          "updatedAt" : "2025-08-07T15:07:37.833769",
+                                          "status" : "PUBLISHED"
+                                        }
+                                        """
+                        )
+                )),
         @ApiResponse(responseCode = "400", description = "Invalid id",
                 content = @Content(
                         mediaType = "application/json",

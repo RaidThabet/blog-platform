@@ -14,8 +14,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Deleted user post",
-                content = {@Content(mediaType = "application/json",
-                        schema = @Schema(implementation = PostDto.class))})})
+        @ApiResponse(responseCode = "204", description = "Deleted user post")})
 public @interface SwaggerDeletePostResponses {
 }
