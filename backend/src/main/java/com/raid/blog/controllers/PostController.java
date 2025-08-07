@@ -8,8 +8,11 @@ import com.raid.blog.domain.dtos.UpdatePostRequestDto;
 import com.raid.blog.domain.entities.Post;
 import com.raid.blog.domain.entities.User;
 import com.raid.blog.mappers.PostMapper;
+import com.raid.blog.openapi.annotations.post.*;
 import com.raid.blog.services.PostService;
 import com.raid.blog.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Post", description = "Describes the different endpoints related to Post")
 @RestController
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
@@ -28,6 +32,8 @@ public class PostController {
     private final PostService postService;
     private final PostMapper postMapper;
 
+    @Operation(summary = "Get list of posts with specific category and tag")
+    @SwaggerGetAllPostsResponses
     @GetMapping
     public ResponseEntity<List<PostDto>> getAllPosts(
             @RequestParam(required = false) UUID categoryId,
@@ -40,6 +46,8 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @Operation(summary = "Get a post by its id")
+    @SwaggerGetPostResponses
     @GetMapping("{id}")
     public ResponseEntity<PostDto> getPost(
             @PathVariable UUID id
@@ -51,6 +59,8 @@ public class PostController {
     }
 
 
+    @Operation(summary = "Get list of posts with status DRAFT")
+    @SwaggerGetDraftsResponses
     @GetMapping("drafts")
     public ResponseEntity<List<PostDto>> getDrafts(
             @RequestAttribute UUID userId
@@ -61,6 +71,8 @@ public class PostController {
         return ResponseEntity.ok(postDTOs);
     }
 
+    @Operation(summary = "Create a new post for authenticated user")
+    @SwaggerCreatePostResponses
     @PostMapping
     public ResponseEntity<PostDto> createPost(
             @RequestBody @Valid CreatePostRequestDto request,
@@ -74,6 +86,9 @@ public class PostController {
         return new ResponseEntity<>(createdPostDto, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update an existing post for authenticated user")
+    @SwaggerUpdatePostResponses
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true)
     @PutMapping("{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable UUID id,
@@ -86,6 +101,8 @@ public class PostController {
         return new ResponseEntity<>(updatedPostDto, HttpStatus.OK);
     }
 
+    @Operation(summary = "Create a new post for authenticated user")
+    @SwaggerDeletePostResponses
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deletePost(
             @PathVariable UUID id
