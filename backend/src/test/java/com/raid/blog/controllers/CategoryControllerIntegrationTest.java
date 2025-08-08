@@ -1,6 +1,7 @@
 package com.raid.blog.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.raid.blog.domain.PostStatus;
 import com.raid.blog.domain.dtos.CategoryDto;
 import com.raid.blog.domain.entities.Category;
@@ -95,6 +96,9 @@ public class CategoryControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         List<CategoryDto> categoryDtos = objectMapper.readValue(responseJson, new TypeReference<>() {
         });
         assertEquals(2, categoryDtos.size());
@@ -119,6 +123,9 @@ public class CategoryControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
         String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         CategoryDto savedCategoryDto = objectMapper.readValue(responseJson, CategoryDto.class);
         assertEquals("New Category", savedCategoryDto.getName());
         assertEquals(3L, categoryRepository.count());
@@ -131,12 +138,17 @@ public class CategoryControllerIntegrationTest {
         String createCategoryRequestJSON = "{\"name\": \" \"}";
 
         // Act and assert
-        mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
                         post("/api/v1/categories")
                                 .contentType("application/json")
                                 .content(createCategoryRequestJSON)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
     }
 
@@ -147,12 +159,17 @@ public class CategoryControllerIntegrationTest {
         String createCategoryRequestJSON = "{\"name\": \"Category 1\"}";
 
         // Act and assert
-        mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
                         post("/api/v1/categories")
                                 .contentType("application/json")
                                 .content(createCategoryRequestJSON)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
     }
 
@@ -164,9 +181,14 @@ public class CategoryControllerIntegrationTest {
         UUID categoryId = category.getId();
 
         // Act and assert
-        mockMvc
+        var mvcResult = mockMvc
                 .perform(delete("/api/v1/categories/" + categoryId))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andReturn();
+        String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 1"));
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 2"));
@@ -180,13 +202,16 @@ public class CategoryControllerIntegrationTest {
         UUID categoryId = category.getId();
 
         // Act and assert
-        mockMvc
+        var mvcResult = mockMvc
                 .perform(delete("/api/v1/categories/" + categoryId))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andReturn();
+        String responseJson = mvcResult.getResponse().getContentAsString();
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
+        System.out.println("Raw JSON request: \n" + prettyJson);
         assertEquals(1L, categoryRepository.count());
         assertFalse(categoryRepository.existsByNameIgnoreCase("Category 2"));
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 1"));
     }
-
-
 }
