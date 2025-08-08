@@ -164,7 +164,7 @@ public class CategoryControllerIntegrationTest {
                                 .contentType("application/json")
                                 .content(createCategoryRequestJSON)
                 )
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andReturn();
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();

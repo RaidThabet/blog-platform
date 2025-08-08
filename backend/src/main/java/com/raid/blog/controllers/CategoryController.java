@@ -4,7 +4,12 @@ import com.raid.blog.domain.dtos.CategoryDto;
 import com.raid.blog.domain.dtos.CreateCategoryRequest;
 import com.raid.blog.domain.entities.Category;
 import com.raid.blog.mappers.CategoryMapper;
+import com.raid.blog.openapi.annotations.category.SwaggerCreateCategoryResponses;
+import com.raid.blog.openapi.annotations.category.SwaggerDeleteCategoryResponses;
+import com.raid.blog.openapi.annotations.category.SwaggerListCategoriesResponses;
 import com.raid.blog.services.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Category", description = "Describes the different endpoints related to Category")
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
@@ -22,6 +28,8 @@ class CategoryController {
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
 
+    @Operation(summary = "Get list of all categories")
+    @SwaggerListCategoriesResponses
     @GetMapping("")
     public ResponseEntity<List<CategoryDto>> listCategories() {
         List<CategoryDto> categories = categoryService.listCategories()
@@ -32,6 +40,8 @@ class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
+    @Operation(summary = "Create a new category")
+    @SwaggerCreateCategoryResponses
     @PostMapping("")
     public ResponseEntity<CategoryDto> createCategory(
             @Valid @RequestBody CreateCategoryRequest createCategoryRequest
@@ -46,6 +56,8 @@ class CategoryController {
         );
     }
 
+    @Operation(summary = "Delete an existing category")
+    @SwaggerDeleteCategoryResponses
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
         @PathVariable("id") UUID id
