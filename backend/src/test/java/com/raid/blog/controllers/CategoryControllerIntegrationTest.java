@@ -98,7 +98,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         List<CategoryDto> categoryDtos = objectMapper.readValue(responseJson, new TypeReference<>() {
         });
         assertEquals(2, categoryDtos.size());
@@ -125,7 +125,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         CategoryDto savedCategoryDto = objectMapper.readValue(responseJson, CategoryDto.class);
         assertEquals("New Category", savedCategoryDto.getName());
         assertEquals(3L, categoryRepository.count());
@@ -148,7 +148,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
     }
 
@@ -169,7 +169,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
     }
 
@@ -188,7 +188,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         assertEquals(2L, categoryRepository.count());
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 1"));
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 2"));
@@ -209,7 +209,7 @@ public class CategoryControllerIntegrationTest {
         String responseJson = mvcResult.getResponse().getContentAsString();
         ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
         String prettyJson = writer.writeValueAsString(objectMapper.readTree(responseJson));
-        System.out.println("Raw JSON request: \n" + prettyJson);
+        System.out.println("Raw JSON response: \n" + prettyJson);
         assertEquals(1L, categoryRepository.count());
         assertFalse(categoryRepository.existsByNameIgnoreCase("Category 2"));
         assertTrue(categoryRepository.existsByNameIgnoreCase("Category 1"));
