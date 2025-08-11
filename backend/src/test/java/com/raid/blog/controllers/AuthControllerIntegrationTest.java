@@ -93,6 +93,32 @@ public class AuthControllerIntegrationTest {
     }
 
     @Test
+    public void should_return_an_error_when_authenticating_with_invalid_credentials() throws JsonProcessingException {
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("raid")
+                .password("pa")
+                .build();
+
+        ResponseEntity<String> response = sendPostRequest(loginRequest, "/api/v1/auth");
+
+        if (response.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertNotNull(errorResponse.getErrors());
+            assertEquals("Validation failed", errorResponse.getMessage());
+            assertEquals(
+                    Set.of("email", "password"),
+                    errorResponse.getErrors().stream().map(ApiErrorResponse.FieldError::getField).collect(Collectors.toSet())
+            );
+        } else if (response.getStatusCode().is2xxSuccessful()) {
+            fail("Invalid login request was treated successfully: " + loginRequest.toString());
+        } else {
+            ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+            fail(errorResponse.toString());
+        }
+    }
+
+    @Test
     public void should_not_authenticate_a_non_existing_user() throws JsonProcessingException {
         LoginRequest loginRequest = LoginRequest.builder()
                 .email("fake@mail.com")
