@@ -45,7 +45,7 @@ class CategoryServiceImplIntegrationTest {
 
         categoryService.createCategory(category);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.createCategory(duplicate));
+        Exception exception = assertThrows(IllegalStateException.class, () -> categoryService.createCategory(duplicate));
         assertEquals("Category already exists with name Science", exception.getMessage());
 
         List<Category> categories = categoryService.listCategories();

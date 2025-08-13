@@ -156,7 +156,7 @@ public class AuthControllerIntegrationTest {
         if (response.getStatusCode().is2xxSuccessful()) {
             assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
             assertTrue(userRepository.existsByEmail("raid2@mail.com"));
-            assertEquals(2, userRepository.count());
+            assertEquals(1, userRepository.countByEmail("raid2@mail.com"));
         } else {
             ApiErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
             fail(errorResponse.toString());

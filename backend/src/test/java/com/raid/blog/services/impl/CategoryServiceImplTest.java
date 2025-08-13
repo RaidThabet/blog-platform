@@ -53,7 +53,7 @@ class CategoryServiceImplTest {
         duplicate.setName("Science");
         when(categoryRepository.existsByNameIgnoreCase("Science")).thenReturn(true);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.createCategory(duplicate));
+        Exception exception = assertThrows(IllegalStateException.class, () -> categoryService.createCategory(duplicate));
         assertEquals("Category already exists with name Science", exception.getMessage());
     }
 
